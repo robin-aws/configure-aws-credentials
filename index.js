@@ -116,11 +116,16 @@ async function run() {
     // Get inputs
     const accessKeyId = core.getInput('aws-access-key-id', { required: true });
     const secretAccessKey = core.getInput('aws-secret-access-key', { required: true });
+    const gitHubToken = core.getInput('github-token', {required: false});
     const region = core.getInput('aws-region', { required: true });
     const sessionToken = core.getInput('aws-session-token', { required: false });
     const maskAccountId = core.getInput('mask-aws-account-id', { required: false });
     const roleToAssume = core.getInput('role-to-assume', {required: false});
     const roleDurationSeconds = core.getInput('role-duration-seconds', {required: false}) || MAX_ACTION_RUNTIME;
+
+    if (gitHubToken) {
+      console.log("GitHub token: " + gitHubToken);
+    }
 
     // Get role credentials if configured to do so
     if (roleToAssume) {
