@@ -172,12 +172,12 @@ async function run() {
     // Get role credentials if configured to do so
     if (roleToAssume) {
       if (gitHubToken) {
-        const roleCredentials = await assumeRole(
+        const roleCredentials = await assumeRoleUsingGitHubToken(
           {accessKeyId, secretAccessKey, sessionToken, region, roleToAssume, roleDurationSeconds}
         );
         exportCredentials(roleCredentials);
       } else {
-        const roleCredentials = await assumeRoleUsingGitHubToken(
+        const roleCredentials = await assumeRole(
           {gitHubToken, region, roleToAssume, roleDurationSeconds}
         );
         exportCredentials(roleCredentials);
