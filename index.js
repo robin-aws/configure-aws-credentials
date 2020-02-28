@@ -59,8 +59,6 @@ async function assumeRoleUsingCognito(params) {
   // Assume a role to get short-lived credentials using longer-lived credentials.
   const isDefined = i => !!i;
 
-  throw new Error("COGNITO WOO!");
-
   const {identityPoolId, region} = params;
   assert(
       [identityPoolId, region].every(isDefined),
@@ -157,18 +155,16 @@ async function run() {
     const roleDurationSeconds = core.getInput('role-duration-seconds', {required: false}) || MAX_ACTION_RUNTIME;
 
     // Get role credentials if configured to do so
-    if (roleToAssume) {
-      if (identityPoolId) {
-        const roleCredentials = await assumeRoleUsingCognito(
-          {identityPoolId, region}
-        );
-        exportCredentials(roleCredentials);
-      } else {
-        const roleCredentials = await assumeRole(
-          {accessKeyId, secretAccessKey, sessionToken, region, roleToAssume, roleDurationSeconds}
-        );
-        exportCredentials(roleCredentials);
-      }
+    if (identityPoolId) {
+      const roleCredentials = await assumeRoleUsingCognito(
+        {identityPoolId, region}
+      );
+      exportCredentials(roleCredentials);
+    } else if (roleToAssume) {
+      const roleCredentials = await assumeRole(
+        {accessKeyId, secretAccessKey, sessionToken, region, roleToAssume, roleDurationSeconds}
+      );
+      exportCredentials(roleCredentials);
     } else {
       exportCredentials({accessKeyId, secretAccessKey, sessionToken});
     }
