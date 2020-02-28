@@ -72,10 +72,12 @@ async function assumeRoleUsingCognito(params) {
   );
 
   aws.config.region = region;
-  aws.config.credentials = new AWS.CognitoIdentityCredentials({
+  aws.config.credentials = new aws.CognitoIdentityCredentials({
     IdentityPoolId: identityPoolId,
   });
-  return aws.config.credentials.get().promise().then(function () {
+  return aws.config.credentials.get()
+  .promise()
+  .then(function () {
     return {
       accessKeyId: aws.config.credentials.accessKeyId,
       secretAccessKey: aws.config.credentials.secretAccessKey,
