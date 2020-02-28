@@ -75,15 +75,12 @@ async function assumeRoleUsingCognito(params) {
   aws.config.credentials = new aws.CognitoIdentityCredentials({
     IdentityPoolId: identityPoolId,
   });
-  return aws.config.credentials.get()
-  .promise()
-  .then(function () {
-    return {
-      accessKeyId: aws.config.credentials.accessKeyId,
-      secretAccessKey: aws.config.credentials.secretAccessKey,
-      sessionToken: aws.config.credentials.sessionToken,
-    };
-  });
+  aws.config.credentials.get();
+  return {
+    accessKeyId: aws.config.credentials.accessKeyId,
+    secretAccessKey: aws.config.credentials.secretAccessKey,
+    sessionToken: aws.config.credentials.sessionToken,
+  };
 }
 
 function sanitizeGithubActor(actor) {
