@@ -80,16 +80,7 @@ async function assumeRoleUsingGitHubToken(params) {
     RoleArn: roleToAssume,
     RoleSessionName: 'GitHubActions',
     WebIdentityToken: gitHubToken,
-    DurationSeconds: roleDurationSeconds,
-    Tags: [
-      {Key: 'GitHub', Value: 'Actions'},
-      {Key: 'Repository', Value: GITHUB_REPOSITORY},
-      {Key: 'Workflow', Value: sanitizeGithubWorkflowName(GITHUB_WORKFLOW)},
-      {Key: 'Action', Value: GITHUB_ACTION},
-      {Key: 'Actor', Value: sanitizeGithubActor(GITHUB_ACTOR)},
-      {Key: 'Branch', Value: GITHUB_REF},
-      {Key: 'Commit', Value: GITHUB_SHA},
-    ]
+    DurationSeconds: roleDurationSeconds
   })
   .promise()
   .then(function (data) {
