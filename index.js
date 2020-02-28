@@ -71,13 +71,17 @@ async function assumeRoleUsingCognito(params) {
       'Missing required environment value. Are you running in GitHub Actions?'
   );
 
-  const credentials = new AWS.CognitoIdentityCredentials({
+  AWS.config.region = region;
+  AWS.config.credentials = new AWS.CognitoIdentityCredentials({
     IdentityPoolId: identityPoolId,
-    RoleSessionName: 'GitHubActions',
-  }, {
-    region: redion,
   });
-  return credentials.get();
+  return AWS.config.credentials.get().promise().then(function () {
+    return {
+      accessKeyId: AWS.config.credentials.accessKeyId,
+      secretAccessKey: AWS.config.credentials.secretAccessKey,
+      sessionToken: AWS.config.credentials.sessionToken,
+    };
+  });
 }
 
 function sanitizeGithubActor(actor) {
