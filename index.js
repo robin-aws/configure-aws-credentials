@@ -59,6 +59,8 @@ async function assumeRoleUsingCognito(params) {
   // Assume a role to get short-lived credentials using longer-lived credentials.
   const isDefined = i => !!i;
 
+  throw new Error("COGNITO WOO!");
+
   const {identityPoolId, region} = params;
   assert(
       [identityPoolId, region].every(isDefined),
