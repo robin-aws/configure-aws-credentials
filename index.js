@@ -62,7 +62,7 @@ async function assumeRoleUsingGitHubToken(params) {
   const {roleToAssume, roleDurationSeconds, gitHubToken, region} = params;
   assert(
       [roleToAssume, roleDurationSeconds, gitHubToken, region].every(isDefined),
-      "Missing required input when assuming a Role."
+      "Missing required input when assuming a Role using a GitHub token."
   );
 
   const {GITHUB_REPOSITORY, GITHUB_WORKFLOW, GITHUB_ACTION, GITHUB_ACTOR, GITHUB_REF, GITHUB_SHA} = process.env;
