@@ -71,10 +71,13 @@ async function assumeRoleUsingCognito(params) {
       'Missing required environment value. Are you running in GitHub Actions?'
   );
 
+  console.log("Setting region:" + region);
   aws.config.region = region;
+  console.log("Setting credentials:" + identityPoolId);
   aws.config.credentials = new aws.CognitoIdentityCredentials({
     IdentityPoolId: identityPoolId,
   });
+  console.log("Getting credentials");
   aws.config.credentials.get();
   return {
     accessKeyId: aws.config.credentials.accessKeyId,
@@ -153,7 +156,6 @@ async function run() {
 
     // Get role credentials if configured to do so
     if (identityPoolId) {
-      console.log("Trying Cognito");
       const roleCredentials = await assumeRoleUsingCognito(
         {identityPoolId, region}
       );
