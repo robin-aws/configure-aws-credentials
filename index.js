@@ -55,14 +55,14 @@ async function assumeRole(params) {
   });
 }
 
-async function assumeRoleUsingGitHubToken(params) {
+async function assumeRoleUsingCognito(params) {
   // Assume a role to get short-lived credentials using longer-lived credentials.
   const isDefined = i => !!i;
 
-  const {roleToAssume, roleDurationSeconds, gitHubToken, region} = params;
+  const {identityPoolId, region} = params;
   assert(
-      [roleToAssume, roleDurationSeconds, gitHubToken, region].every(isDefined),
-      "Missing required input when assuming a Role using a GitHub token."
+      [identityPoolId, region].every(isDefined),
+      "Missing required input when assuming a Role using Cognito."
   );
 
   const {GITHUB_REPOSITORY, GITHUB_WORKFLOW, GITHUB_ACTION, GITHUB_ACTOR, GITHUB_REF, GITHUB_SHA} = process.env;
@@ -71,25 +71,13 @@ async function assumeRoleUsingGitHubToken(params) {
       'Missing required environment value. Are you running in GitHub Actions?'
   );
 
-  const endpoint = util.format('https://sts.%s.amazonaws.com', region);
-
-  const sts = new aws.STS({
-    region, endpoint, customUserAgent: USER_AGENT
-  });
-  return sts.assumeRoleWithWebIdentity({
-    RoleArn: roleToAssume,
+  const credentials = new AWS.CognitoIdentityCredentials({
+    IdentityPoolId: identityPoolId,
     RoleSessionName: 'GitHubActions',
-    WebIdentityToken: gitHubToken,
-    DurationSeconds: roleDurationSeconds
-  })
-  .promise()
-  .then(function (data) {
-    return {
-      accessKeyId: data.Credentials.AccessKeyId,
-      secretAccessKey: data.Credentials.SecretAccessKey,
-      sessionToken: data.Credentials.SessionToken,
-    };
+  }, {
+    region: redion,
   });
+  return credentials.get();
 }
 
 function sanitizeGithubActor(actor) {
@@ -153,7 +141,7 @@ async function run() {
     // Get inputs
     const accessKeyId = core.getInput('aws-access-key-id', { required: false });
     const secretAccessKey = core.getInput('aws-secret-access-key', { required: false });
-    const gitHubToken = core.getInput('github-token', {required: false});
+    const identityPoolId = core.getInput('cognito-identity-pool-id', {required: false});
     const region = core.getInput('aws-region', { required: true });
     const sessionToken = core.getInput('aws-session-token', { required: false });
     const maskAccountId = core.getInput('mask-aws-account-id', { required: false });
@@ -162,9 +150,9 @@ async function run() {
 
     // Get role credentials if configured to do so
     if (roleToAssume) {
-      if (gitHubToken) {
-        const roleCredentials = await assumeRoleUsingGitHubToken(
-          {gitHubToken, region, roleToAssume, roleDurationSeconds}
+      if (identityPoolId) {
+        const roleCredentials = await assumeRoleUsingCognito(
+          {identityPoolId, region}
         );
         exportCredentials(roleCredentials);
       } else {
