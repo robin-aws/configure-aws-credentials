@@ -160,8 +160,8 @@ async function exportAccountId(maskAccountId) {
 async function run() {
   try {
     // Get inputs
-    const accessKeyId = core.getInput('aws-access-key-id', { required: true });
-    const secretAccessKey = core.getInput('aws-secret-access-key', { required: true });
+    const accessKeyId = core.getInput('aws-access-key-id', { required: false });
+    const secretAccessKey = core.getInput('aws-secret-access-key', { required: false });
     const gitHubToken = core.getInput('github-token', {required: false});
     const region = core.getInput('aws-region', { required: true });
     const sessionToken = core.getInput('aws-session-token', { required: false });
