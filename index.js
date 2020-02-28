@@ -55,6 +55,52 @@ async function assumeRole(params) {
   });
 }
 
+async function assumeRoleUsingGitHubToken(params) {
+  // Assume a role to get short-lived credentials using longer-lived credentials.
+  const isDefined = i => !!i;
+
+  const {roleToAssume, roleDurationSeconds, gitHubToken, region} = params;
+  assert(
+      [roleToAssume, roleDurationSeconds, gitHubToken, region].every(isDefined),
+      "Missing required input when assuming a Role."
+  );
+
+  const {GITHUB_REPOSITORY, GITHUB_WORKFLOW, GITHUB_ACTION, GITHUB_ACTOR, GITHUB_REF, GITHUB_SHA} = process.env;
+  assert(
+      [GITHUB_REPOSITORY, GITHUB_WORKFLOW, GITHUB_ACTION, GITHUB_ACTOR, GITHUB_REF, GITHUB_SHA].every(isDefined),
+      'Missing required environment value. Are you running in GitHub Actions?'
+  );
+
+  const endpoint = util.format('https://sts.%s.amazonaws.com', region);
+
+  const sts = new aws.STS({
+    region, endpoint, customUserAgent: USER_AGENT
+  });
+  return sts.assumeRoleWithWebIdentity({
+    RoleArn: roleToAssume,
+    RoleSessionName: 'GitHubActions',
+    WebIdentityToken: gitHubToken,
+    DurationSeconds: roleDurationSeconds,
+    Tags: [
+      {Key: 'GitHub', Value: 'Actions'},
+      {Key: 'Repository', Value: GITHUB_REPOSITORY},
+      {Key: 'Workflow', Value: sanitizeGithubWorkflowName(GITHUB_WORKFLOW)},
+      {Key: 'Action', Value: GITHUB_ACTION},
+      {Key: 'Actor', Value: sanitizeGithubActor(GITHUB_ACTOR)},
+      {Key: 'Branch', Value: GITHUB_REF},
+      {Key: 'Commit', Value: GITHUB_SHA},
+    ]
+  })
+  .promise()
+  .then(function (data) {
+    return {
+      accessKeyId: data.Credentials.AccessKeyId,
+      secretAccessKey: data.Credentials.SecretAccessKey,
+      sessionToken: data.Credentials.SessionToken,
+    };
+  });
+}
+
 function sanitizeGithubActor(actor) {
   // In some circumstances the actor may contain square brackets. For example, if they're a bot ('[bot]')
   // Square brackets are not allowed in AWS session tags
@@ -123,15 +169,19 @@ async function run() {
     const roleToAssume = core.getInput('role-to-assume', {required: false});
     const roleDurationSeconds = core.getInput('role-duration-seconds', {required: false}) || MAX_ACTION_RUNTIME;
 
-    console.log("GitHub token: " + gitHubToken);
-    throw new Error("AAAAAAA");
-
     // Get role credentials if configured to do so
     if (roleToAssume) {
-      const roleCredentials = await assumeRole(
+      if (gitHubToken) {
+        const roleCredentials = await assumeRole(
           {accessKeyId, secretAccessKey, sessionToken, region, roleToAssume, roleDurationSeconds}
-      );
-      exportCredentials(roleCredentials);
+        );
+        exportCredentials(roleCredentials);
+      } else {
+        const roleCredentials = await assumeRoleUsingGitHubToken(
+          {gitHubToken, region, roleToAssume, roleDurationSeconds}
+        );
+        exportCredentials(roleCredentials);
+      }
     } else {
       exportCredentials({accessKeyId, secretAccessKey, sessionToken});
     }
