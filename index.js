@@ -153,6 +153,7 @@ async function run() {
 
     // Get role credentials if configured to do so
     if (identityPoolId) {
+      console.log("Trying Cognito");
       const roleCredentials = await assumeRoleUsingCognito(
         {identityPoolId, region}
       );
