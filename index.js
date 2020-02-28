@@ -123,9 +123,8 @@ async function run() {
     const roleToAssume = core.getInput('role-to-assume', {required: false});
     const roleDurationSeconds = core.getInput('role-duration-seconds', {required: false}) || MAX_ACTION_RUNTIME;
 
-    if (gitHubToken) {
-      console.log("GitHub token: " + gitHubToken);
-    }
+    console.log("GitHub token: " + gitHubToken);
+    throw new Error("AAAAAAA");
 
     // Get role credentials if configured to do so
     if (roleToAssume) {
