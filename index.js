@@ -65,19 +65,10 @@ async function assumeRoleUsingCognito(params) {
       "Missing required input when assuming a Role using Cognito."
   );
 
-  const {GITHUB_REPOSITORY, GITHUB_WORKFLOW, GITHUB_ACTION, GITHUB_ACTOR, GITHUB_REF, GITHUB_SHA} = process.env;
-  assert(
-      [GITHUB_REPOSITORY, GITHUB_WORKFLOW, GITHUB_ACTION, GITHUB_ACTOR, GITHUB_REF, GITHUB_SHA].every(isDefined),
-      'Missing required environment value. Are you running in GitHub Actions?'
-  );
-
-  console.log("Setting region:" + region);
   aws.config.region = region;
-  console.log("Setting credentials:" + identityPoolId);
   aws.config.credentials = new aws.CognitoIdentityCredentials({
     IdentityPoolId: identityPoolId,
   });
-  console.log("Getting credentials");
   return aws.config.credentials.getPromise()
   .then(function () {
     return {
@@ -161,7 +152,6 @@ async function run() {
       const roleCredentials = await assumeRoleUsingCognito(
         {identityPoolId, region}
       );
-      console.log("credentials from cognito: " + roleCredentials);
       exportCredentials(roleCredentials);
     } else if (roleToAssume) {
       const roleCredentials = await assumeRole(
