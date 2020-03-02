@@ -80,7 +80,6 @@ async function assumeRoleUsingCognito(params) {
   console.log("Getting credentials");
   aws.config.credentials.getPromise()
   .then(function () {
-    console.log(aws.config.credentials)
     return {
       accessKeyId: aws.config.credentials.accessKeyId,
       secretAccessKey: aws.config.credentials.secretAccessKey,
@@ -162,6 +161,7 @@ async function run() {
       const roleCredentials = await assumeRoleUsingCognito(
         {identityPoolId, region}
       );
+      console.log("credentials from cognito: " + roleCredentials);
       exportCredentials(roleCredentials);
     } else if (roleToAssume) {
       const roleCredentials = await assumeRole(
