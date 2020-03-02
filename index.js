@@ -78,7 +78,7 @@ async function assumeRoleUsingCognito(params) {
     IdentityPoolId: identityPoolId,
   });
   console.log("Getting credentials");
-  aws.config.credentials.getPromise()
+  return aws.config.credentials.getPromise()
   .then(function () {
     return {
       accessKeyId: aws.config.credentials.accessKeyId,
